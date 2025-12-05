@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect
 from flask_sqlalchemy import SQLAlchemy
 from dataclasses import dataclass
 app = Flask(__name__)
@@ -21,6 +21,15 @@ books = [
 
 def get_items():
     return books
+
+@app.route("/")
+def index():
+    return """
+    <h1> routes </h1>
+    <ul>
+    <li><a href="/inventory">/inventory</a></li>
+    </ul>
+    """
 
 @app.route("/inventory")
 def inventory():
