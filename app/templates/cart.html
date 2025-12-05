@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+<head>
+    <title>Shopping Cart - ChupChap Pathshala</title>
+</head>
+<body>
+    <h2>Your Cart</h2>
+    <a href="{{ url_for('main.catalog') }}">Continue Shopping</a>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Action</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Subtotal</th>
+                <th>Remove</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% set ns = namespace(total=0) %}
+            {% for item in cart.items %}
+            <tr>
+                <td>{{ item.book.title }}</td>
+                <td>{{ item.action|capitalize }}</td>
+                <td>
+                    {% if item.action == 'buy' %}
+                        ${{ item.book.price }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>{{ item.quantity }}</td>
+                <td>
+                    {% if item.action == 'buy' %}
+                        ${{ item.book.price * item.quantity }}
+                        {% set ns.total = ns.total + (item.book.price * item.quantity) %}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td><a href="{{ url_for('main.remove_from_cart', item_id=item.id) }}">Remove</a></td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <td colspan="4" align="right"><strong>Total (Purchase):</strong></td>
+                <td><strong>${{ ns.total }}</strong></td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+    <br>
+    <form action="{{ url_for('main.checkout') }}" method="POST">
+        <label for="coupon_code">Coupon Code:</label>
+        <input type="text" name="coupon_code" placeholder="Enter code">
+        <button type="submit">Proceed to Checkout</button>
+    </form>
+    
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+</body>
+</html>

@@ -16,6 +16,8 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(256))
     role = db.Column(db.String(20), default='customer')
+    membership_type = db.Column(db.String(20), default='standard') # standard, premium
+    membership_expiry = db.Column(db.DateTime, nullable=True)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -23,10 +25,74 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+    def is_admin(self):
+        return self.role == 'admin'
+
+    def is_staff(self):
+        return self.role in ['admin', 'librarian']
+
 class Book(db.Model):
     __tablename__ = 'books'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(140), nullable=False)
     author = db.Column(db.String(140), nullable=False)
     price = db.Column(db.Float, nullable=False)
-    stock = db.Column(db.Integer, default=1)
+    
+    # Inventory Management
+    item_type = db.Column(db.String(20), default='hybrid') # circulation, sale, hybrid
+    location = db.Column(db.String(100)) # e.g., "Aisle 3, Shelf B"
+    
+    # Stock Counters
+    stock_total = db.Column(db.Integer, default=1)
+    stock_available = db.Column(db.Integer, default=1)
+    stock_borrowed = db.Column(db.Integer, default=0)
+    stock_sold = db.Column(db.Integer, default=0)
+
+    def __repr__(self):
+        return f'<Book {self.title}>'
+
+class Cart(db.Model):
+    __tablename__ = 'carts'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user = db.relationship('User', backref=db.backref('cart', uselist=False))
+    items = db.relationship('CartItem', backref='cart', lazy='dynamic')
+
+class CartItem(db.Model):
+    __tablename__ = 'cart_items'
+    id = db.Column(db.Integer, primary_key=True)
+    cart_id = db.Column(db.Integer, db.ForeignKey('carts.id'))
+    book_id = db.Column(db.Integer, db.ForeignKey('books.id'))
+    book = db.relationship('Book')
+    quantity = db.Column(db.Integer, default=1)
+    action = db.Column(db.String(20)) # 'borrow' or 'buy'
+
+class Loan(db.Model):
+    __tablename__ = 'loans'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    book_id = db.Column(db.Integer, db.ForeignKey('books.id'))
+    checkout_date = db.Column(db.DateTime, default=datetime.utcnow)
+    due_date = db.Column(db.DateTime)
+    return_date = db.Column(db.DateTime, nullable=True)
+    status = db.Column(db.String(20), default='active') # active, returned, overdue
+
+class Sale(db.Model):
+    __tablename__ = 'sales'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    book_id = db.Column(db.Integer, db.ForeignKey('books.id'))
+    sale_date = db.Column(db.DateTime, default=datetime.utcnow)
+    price_at_sale = db.Column(db.Float)
+
+class Discount(db.Model):
+    __tablename__ = 'discounts'
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(20), unique=True)
+    description = db.Column(db.String(100))
+    discount_type = db.Column(db.String(20)) # 'percent', 'fixed'
+    value = db.Column(db.Float)
+    expiry_date = db.Column(db.DateTime)
+
+    def is_valid(self):
+        return self.expiry_date > datetime.utcnow()

@@ -23,4 +23,22 @@ def register():
 
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
-    return "Login Page Coming Soon! (Try /auth/register first)"
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+    
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user and user.check_password(form.password.data):
+            login_user(user)
+            next_page = request.args.get('next')
+            return redirect(next_page) if next_page else redirect(url_for('main.index'))
+        else:
+            flash('Login Unsuccessful. Please check email and password')
+            
+    return render_template('auth/login.html', title='Login', form=form)
+
+@bp.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('main.index'))

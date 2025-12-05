@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h1>Welcome to ChupChap Pathshala</h1>
+    <p>Your portal to knowledge. Borrow books, buy copies, and manage your reading list all in one place.</p>
+    
+    {% if current_user.is_authenticated %}
+        <a href="{{ url_for('main.inventory') }}" class="btn btn-primary">Browse Catalog</a>
+        <a href="{{ url_for('main.view_cart') }}" class="btn btn-secondary">View Cart</a>
+    {% else %}
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Get Started</a>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-secondary">Login</a>
+    {% endif %}
+</div>
+
+<div class="features-grid">
+    <div class="card">
+        <h3>📚 Extensive Catalog</h3>
+        <p>Browse thousands of titles from classics to modern bestsellers. Real-time availability tracking.</p>
+    </div>
+    <div class="card">
+        <h3>🛒 Buy or Borrow</h3>
+        <p>Unique flexibility to either check out a book for free or purchase a copy for your personal collection.</p>
+    </div>
+    <div class="card">
+        <h3>💎 Premium Perks</h3>
+        <p>Join our Premium Membership for exclusive discounts and extended borrowing periods.</p>
+    </div>
+</div>
+{% endblock %}
