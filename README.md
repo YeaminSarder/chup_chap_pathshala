@@ -5,8 +5,7 @@ A Flask-based library and e-commerce platform.
 - clone this repo and enter the repo directory
 - create and activate python virtual environment
   ``` bash
-  virtualenv .venv
-  source .venv/bin/activate
+  virtualenv .venv && source .venv/bin/activate
   ```
 - install dependencies
   ``` bash
