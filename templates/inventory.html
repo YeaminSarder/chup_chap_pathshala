@@ -1,15 +1,25 @@
 <!doctype html>
-<title>Hello from Flask</title>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+</head>
+
+<body>
+  <script type="text/javascript" src="https://livejs.com/live.js"></script>
+  <link href={{url_for ('static', filename="css/main.css")}} rel="stylesheet"/>  
+<title>Helo from Flask</title>
+
 {% if items %}
-  <ol>
+  <div class="flex flex-wrap">
 	{% for item in items %}
-	  <li>
+	  <div>
 		{% block item scoped%}
 		  <p>item {{ item }}!</p>
 		{% endblock item %}
-	  </li>
+	  </div>
 	{% endfor %}
-  </ol>
+  </div>
 {% else %}
   <h1>No items!</h1>
 {% endif %}
+</body>

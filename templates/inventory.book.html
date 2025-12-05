@@ -1,8 +1,7 @@
 {% extends "inventory.html"%}
-<p> hello </p>
 {% block item %}
-  <div>
-	<h2> {{ item.title }} </h2>
-	<h3>{{ item.author }}</h3>
+  <div class="shadow-lg rounded max-w-sm overflow-hidden px-8 py-8">
+	<div class="text-red-500 font-bold text-xl"> {{ item.title }} </div>
+	<div class="text-base">{{ item.author }}</div>
   </div>
 {% endblock item %}
