@@ -12,7 +12,7 @@
 
 3.  **Run the App**:
     ```bash
-    python run.py
+    run.py
     ```
 
 4.  **Open Browser**:
