@@ -28,10 +28,20 @@
     <div class="features-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
         {% for book in books %}
         <div class="card" style="display: flex; flex-direction: column; overflow: hidden;">
-            <div
-                style="height: 200px; background: #F3F4F6; margin: -1.5rem -1.5rem 1rem -1.5rem; display: flex; align-items: center; justify-content: center;">
+            <div class="book-image-container">
                 <img src="{{ book.image_url or 'https://placehold.co/150x220?text=No+Cover' }}" alt="{{ book.title }}"
-                    style="height: 100%; width: 100%; object-fit: cover;">
+                    style="height: 100%; width: 100%; object-fit: cover;" id="img-{{ book.id }}">
+                
+                {% if current_user.is_staff() %}
+                <div class="upload-overlay" onclick="document.getElementById('file-{{ book.id }}').click()">
+                    <div class="upload-btn">+</div>
+                </div>
+                <!-- Loading Spinner -->
+                <div id="spinner-{{ book.id }}" class="upload-spinner">↻</div>
+                
+                <input type="file" id="file-{{ book.id }}" accept="image/*" style="display: none;" 
+                       onchange="uploadCover(this, {{ book.id }})">
+                {% endif %}
             </div>
             <h3>{{ book.title }}</h3>
             <p><strong>Author:</strong> {{ book.author }}</p>
@@ -105,4 +115,59 @@
             Full Catalog</a>
     </div>
 </div>
+<script>
+function uploadCover(input, bookId) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        
+        // Client-side validation: Check file size (16MB limit)
+        if (file.size > 16 * 1024 * 1024) {
+            alert('File is too large. Maximum size is 16MB.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        // Show Spinner / Hide overlay
+        const spinner = document.getElementById(`spinner-${bookId}`);
+        // Ensure overlay can be hidden if needed, though mostly spinner is enough context
+        
+        if(spinner) spinner.style.display = 'block';
+        
+        fetch(`/upload_cover/${bookId}`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(async response => {
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.indexOf("application/json") !== -1) {
+                return response.json();
+            } else {
+                // If response is not JSON (e.g., 413 HTML from Nginx/Flask, or 500)
+                const text = await response.text();
+                throw new Error(`Server returned non-JSON response: ${response.status} ${response.statusText}. Response: ${text.substring(0, 100)}...`);
+            }
+        })
+        .then(data => {
+            if (data.success) {
+                // Update Image Source
+                const img = document.getElementById(`img-${bookId}`);
+                if(img) img.src = data.image_url + '?t=' + new Date().getTime();
+            } else {
+                alert('Upload failed: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Upload failed. Check console for details.\n' + error.message);
+        })
+        .finally(() => {
+            if(spinner) spinner.style.display = 'none';
+            // Clear input so same file can be selected again if needed
+            input.value = '';
+        });
+    }
+}
+</script>
 {% endblock %}
