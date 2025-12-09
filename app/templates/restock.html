@@ -16,7 +16,8 @@
     </p>
 
     <form method="POST">
-        <div class="mb-6">
+      <div class="mb-6">
+		    {{ form.hidden_tag() }}
             {{ form.quantity.label(class_="block mb-1 font-medium text-gray-700") }}
             {{ form.quantity(class_="w-full p-3 border border-gray-300 rounded-lg") }}
 
@@ -24,7 +25,11 @@
             <p class="text-red-500 text-sm">{{ error }}</p>
             {% endfor %}
         </div>
-
+        <div class="flex gap-3 w-full mb-6">
+		  {% for error, reason in form.errors.items() %}
+			<p class='w-full text-red-600 border-red-100 p-4 border-solid border-1 rounded'>{{error}} - {{reason}}</p>
+		  {% endfor %}
+		</div>
         <div class="flex gap-3">
             {{ form.submit(class_="px-4 py-2 bg-green-600 text-white rounded-lg cursor-pointer") }}
 
