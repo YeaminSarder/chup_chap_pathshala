@@ -14,7 +14,7 @@
 
 <body>
     <nav class="navbar">
-        <!-- 1. Logo Section -->
+        <!-- Logo Section -->
         <div class="logo-section">
             <a href="{{ url_for('main.index') }}" class="nav-brand">
                 <img src="{{ url_for('static', filename='images/cp logo.png') }}" alt="Logo" class="brand-icon" style="width: 40px; height: 40px; object-fit: contain;">
@@ -25,7 +25,7 @@
             </a>
         </div>
 
-        <!-- 2. Search Bar -->
+        <!-- Search Bar -->
         <div class="search-section relative">
             <form action="{{ url_for('main.search') }}" method="GET" class="search-form w-full relative">
                 <input type="text" name="q" id="searchInput" placeholder="Search books..." class="search-input w-full" autocomplete="off">
@@ -37,12 +37,12 @@
                 </button>
                 <!-- Autocomplete Dropdown -->
                 <div id="suggestions" class="absolute top-full left-0 w-full bg-white rounded-lg shadow-md border border-gray-100 hidden z-50 overflow-hidden mt-4">
-                    <!-- Suggestions will be injected here -->
+                    
                 </div>
             </form>
         </div>
 
-        <!-- 3. Navigation Links (Pill shaped) -->
+        <!-- Navigation Links (Pill shaped) -->
         <div class="nav-links">
             <a href="{{ url_for('main.index') }}" class="nav-pill">Home</a>
             <a href="{{ url_for('main.catalog') }}" class="nav-pill">Todays Offer</a>
@@ -64,7 +64,7 @@
             {% endif %}
         </div>
 
-        <!-- 4. User Actions -->
+        <!-- User Actions -->
         <div class="user-actions">
             {% if current_user.is_authenticated %}
             <a href="{{ url_for('main.profile') }}" class="user-profile">
@@ -115,7 +115,7 @@
     </div>
     <footer class="footer">
         <div class="container footer-content">
-            <!-- Column 1: Contact Info -->
+            <!-- Contact Info -->
             <div class="footer-col">
                 <div class="footer-item">
                     <i class="fas fa-map-marker-alt footer-icon"></i>
@@ -130,7 +130,7 @@
                 </div>
             </div>
 
-            <!-- Column 2: Support -->
+            <!-- Support -->
             <div class="footer-col">
                 <h4>Support</h4>
                 <ul class="footer-list">
@@ -142,7 +142,7 @@
                 </ul>
             </div>
 
-            <!-- Column 3: About Us -->
+            <!-- About Us -->
             <div class="footer-col">
                 <h4>About Us</h4>
                 <ul class="footer-list">
@@ -187,12 +187,14 @@
     <script>
         const searchInput = document.getElementById('searchInput');
         const suggestionsBox = document.getElementById('suggestions');
+        let currentFocus = -1; // Track keyboard selection
 
         searchInput.addEventListener('input', function() {
             const query = this.value;
+            currentFocus = -1; // Reset focus on new input
+
             if (query.length < 2) {
-                suggestionsBox.classList.add('hidden');
-                searchInput.closest('form').classList.remove('has-suggestions'); // Remove styling
+                closeSuggestions();
                 return;
             }
 
@@ -202,7 +204,7 @@
                     if (data.length > 0) {
                         suggestionsBox.innerHTML = '';
                         // Limit to 5 suggestions
-                        data.slice(0, 5).forEach(title => {
+                        data.slice(0, 5).forEach((title, index) => {
                             const div = document.createElement('div');
                             // Add icon + text structure
                             div.innerHTML = `
@@ -215,32 +217,84 @@
                                 </div>
                             `;
                             
-                            // Modern browser style: clear readable text, full width hover, pointer cursor
-                            div.className = 'px-4 py-3 hover:bg-gray-100 cursor-pointer text-sm text-gray-800 font-medium transition-colors duration-150';
-                            div.onclick = function() {
-                                searchInput.value = title;
-                                suggestionsBox.classList.add('hidden');
-                                searchInput.closest('form').classList.remove('has-suggestions');
-                                // Optional: Submit form immediately
-                                searchInput.closest('form').submit();
-                            };
+                            
+                            div.className = 'suggestion-row px-4 py-3 cursor-pointer text-sm text-gray-800 font-medium transition-colors duration-150 border-b border-gray-100 last:border-0';
+                            
+                            
+                            div.addEventListener('click', function() {
+                                selectSuggestion(title);
+                            });
+
+                            
+                            div.addEventListener('mouseenter', function() {
+                                currentFocus = index;
+                                updateActiveSuggestion(suggestionsBox.children);
+                            });
+
                             suggestionsBox.appendChild(div);
                         });
                         suggestionsBox.classList.remove('hidden');
-                        searchInput.closest('form').classList.add('has-suggestions'); // Add styling
+                        searchInput.closest('form').classList.add('has-suggestions');
                     } else {
-                        suggestionsBox.classList.add('hidden');
-                        searchInput.closest('form').classList.remove('has-suggestions');
+                        closeSuggestions();
                     }
                 })
                 .catch(error => console.error('Error fetching suggestions:', error));
         });
 
+        // Keyboard Navigation
+        searchInput.addEventListener('keydown', function(e) {
+            const items = suggestionsBox.children;
+            if (items.length === 0) return;
+
+            if (e.key === 'ArrowDown') {
+                currentFocus++;
+                if (currentFocus >= items.length) currentFocus = 0; // Loop to top
+                updateActiveSuggestion(items);
+            } else if (e.key === 'ArrowUp') {
+                currentFocus--;
+                if (currentFocus < 0) currentFocus = items.length - 1; // Loop to bottom
+                updateActiveSuggestion(items);
+            } else if (e.key === 'Enter') {
+                if (currentFocus > -1 && items[currentFocus]) {
+                    e.preventDefault(); // Prevent form submit initially
+                    // Trigger click on selected item
+                    items[currentFocus].click();
+                }
+            } else if (e.key === 'Escape') {
+                closeSuggestions();
+            }
+        });
+
+        function updateActiveSuggestion(items) {
+            // Remove active class from all
+            for (let i = 0; i < items.length; i++) {
+                items[i].classList.remove('bg-gray-100'); // Tailwind hover color
+            }
+            // Add active class to current
+            if (currentFocus > -1 && items[currentFocus]) {
+                items[currentFocus].classList.add('bg-gray-100');
+                // Optional: Scroll into view if we had a scrollbar
+            }
+        }
+
+        function selectSuggestion(value) {
+            searchInput.value = value;
+            closeSuggestions();
+            searchInput.closest('form').submit();
+        }
+
+        function closeSuggestions() {
+            suggestionsBox.innerHTML = '';
+            suggestionsBox.classList.add('hidden');
+            searchInput.closest('form').classList.remove('has-suggestions');
+            currentFocus = -1;
+        }
+
         // Close suggestions when clicking outside
         document.addEventListener('click', function(e) {
             if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
-                suggestionsBox.classList.add('hidden');
-                searchInput.closest('form').classList.remove('has-suggestions');
+                closeSuggestions();
             }
         });
     </script>
