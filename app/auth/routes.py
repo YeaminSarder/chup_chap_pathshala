@@ -1,10 +1,15 @@
-from flask import render_template, redirect, url_for, flash, request
+from flask import render_template, redirect, url_for, flash, request, session
 from flask_login import login_user, logout_user, current_user, login_required
 from app import db
 from app.auth import bp
 from app.auth.forms import RegistrationForm, LoginForm, CreateAdminForm
 from app.models import User
 from config import Config
+
+@bp.before_app_request
+def before_request():
+    session.permanent = True
+
 
 @bp.route('/register', methods=['GET', 'POST'])
 def register():
@@ -168,7 +173,7 @@ from app.auth.forms import ResetPasswordRequestForm, ResetPasswordForm
 def send_reset_email(user):
     token = user.get_reset_token()
     msg = Message('ChupChap Pathshala Password Reset Request',
-                  sender=current_app.config['ADMINS'][0],
+                  sender=f"ChupChap Support <{current_app.config['ADMINS'][0]}>",
                   recipients=[user.email])
     
 
