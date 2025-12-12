@@ -53,61 +53,7 @@
 </div>
 
 <!-- Featured Books Section -->
-<div style="margin-bottom: 3rem;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-        <h2 style="font-size: 1.5rem; color: #111827; font-weight: 700;">Featured Books</h2>
-        <a href="{{ url_for('main.catalog') }}" style="color: #4F46E5; font-weight: 600; text-decoration: none;">View
-            All Books &rarr;</a>
-    </div>
-
-    <div class="features-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
-        {% for book in books %}
-        <div class="card" style="display: flex; flex-direction: column; overflow: hidden;">
-            <div class="book-image-container">
-                <img src="{{ book.image_url or 'https://placehold.co/150x220?text=No+Cover' }}" alt="{{ book.title }}"
-                    style="height: 100%; width: 100%; object-fit: cover;" id="img-{{ book.id }}">
-                
-                {% if current_user.is_staff() %}
-                <div class="upload-overlay" onclick="document.getElementById('file-{{ book.id }}').click()">
-                    <div class="upload-btn">+</div>
-                </div>
-                <!-- Loading Spinner -->
-                <div id="spinner-{{ book.id }}" class="upload-spinner">↻</div>
-                
-                <input type="file" id="file-{{ book.id }}" accept="image/*" style="display: none;" 
-                       onchange="uploadCover(this, {{ book.id }})">
-                {% endif %}
-            </div>
-            <h3>{{ book.title }}</h3>
-            <p><strong>Author:</strong> {{ book.author }}</p>
-            <p><strong>Availability:</strong> <span
-                    style="background: #e5e7eb; padding: 2px 6px; border-radius: 4px; font-size: 0.9em;">{{
-                    book.item_type|capitalize }}</span></p>
-            <p><strong>Category:</strong> <span style="color: #6B7280;">{{ book.category }}</span></p>
-            <p><strong>Price:</strong> {{ "%.2f"|format(book.price) }}</p>
-            <!-- Note: Displaying stock but action buttons require login/cart logic which is handled below -->
-
-            <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
-                <form action="{{ url_for('main.add_to_cart', book_id=book.id) }}" method="POST" style="width: 100%;">
-                    {% if book.item_type in ['sale', 'hybrid'] and book.stock_available > 0 %}
-                    <button type="submit" name="action" value="buy" class="btn-action btn-buy"
-                        style="margin-bottom: 0.5rem;">Buy</button>
-                    {% endif %}
-
-                    {% if book.item_type in ['circulation', 'hybrid'] and book.stock_available > 0 %}
-                    <button type="submit" name="action" value="borrow" class="btn-action btn-borrow">Borrow</button>
-                    {% endif %}
-
-                    {% if book.stock_available == 0 %}
-                    <button disabled
-                        class="btn-action btn-disabled">Out of Stock</button>
-                    {% endif %}
-                </form>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-</div>
+{% include "featured.html" %}
 
 <!-- Promotional / Premium Perks Section -->
 <!-- Promotional / Premium Perks Section -->
