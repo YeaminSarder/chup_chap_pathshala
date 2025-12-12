@@ -297,6 +297,73 @@
                 closeSuggestions();
             }
         });
+
+
+        // Intercept Add to Cart Forms
+        document.addEventListener('submit', function(e) {
+            if (e.target && e.target.action && e.target.action.includes('/cart/add/')) {
+                e.preventDefault();
+                const form = e.target;
+                const button = form.querySelector('button[type="submit"]:hover') || form.querySelector('button[type="submit"]'); 
+                // Note: :hover is a heuristic, better to rely on submitter if supported or just grab the first one if only one exists usually.
+                // Better approach with e.submitter if available (modern browsers)
+                const submitter = e.submitter;
+                
+                const originalText = submitter ? submitter.innerHTML : (button ? button.innerHTML : 'Submit');
+                
+                if (submitter) {
+                    submitter.disabled = true;
+                    submitter.innerHTML = '<span class="upload-spinner" style="display:inline-block; position:static; font-size:1em;">↻</span>';
+                }
+
+                const formData = new FormData(form);
+                if (submitter && submitter.name) {
+                    formData.append(submitter.name, submitter.value);
+                }
+
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update badge
+                        const existingBadge = document.querySelector('.cart-badge');
+                        if (existingBadge) {
+                            existingBadge.textContent = data.cart_count;
+                        } else {
+                            const iconContainer = document.querySelector('.cart-icon');
+                            if (iconContainer) {
+                                const newBadge = document.createElement('span');
+                                newBadge.className = 'cart-badge';
+                                newBadge.textContent = data.cart_count;
+                                iconContainer.appendChild(newBadge);
+                            }
+                        }
+                        
+                        // Temporary Button Feedback
+                        
+                    } else {
+                        // Fallback
+                        window.location.href = form.action;
+                    }
+                })
+                .catch(err => {
+                    console.error('AJAX Error:', err);
+                    form.submit(); // Fallback
+                })
+                .finally(() => {
+                    if (submitter) {
+                        submitter.disabled = false;
+                        submitter.innerHTML = originalText;
+                    }
+                });
+            }
+        });
     </script>
 </body>
 

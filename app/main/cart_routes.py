@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, flash, request
+from flask import render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_required, current_user
 from app import db
 from app.main import bp
@@ -35,6 +35,14 @@ def add_to_cart(book_id):
         db.session.add(cart_item)
         
     db.session.commit()
+    
+    # Check for AJAX request
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify({
+            'success': True, 
+            'cart_count': current_user.cart.items.count()
+        })
+
     flash(f'Added {book.title} to cart for {action}!', 'success')
     return redirect(request.referrer or url_for('main.index'))
 
