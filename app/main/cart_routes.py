@@ -10,7 +10,7 @@ def add_to_cart(book_id):
     book = Book.query.get_or_404(book_id)
     action = request.form.get('action') # 'borrow' or 'buy'
     
-    # Conflict Resolution: Borrowing specific checks
+    # Borrowing specific checks
     if action == 'borrow':
         if book.item_type == 'sale':
             flash('This item is for Sale only.', 'danger')
@@ -57,6 +57,38 @@ def view_cart():
     # Calculate Subtotal (only for buying)
     subtotal = sum(item.book.price * item.quantity for item in items if item.action == 'buy')
     return render_template('cart.html', items=items, subtotal=subtotal)
+
+@bp.route('/cart/update/<int:item_id>', methods=['POST'])
+@login_required
+def update_quantity(item_id):
+    item = CartItem.query.get_or_404(item_id)
+    if item.cart.user != current_user:
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 403
+        
+    data = request.get_json()
+    action = data.get('action') # 'increase' or 'decrease'
+    
+    if action == 'increase':
+        # Check stock for buying
+        if item.action == 'buy' and item.book.stock_available <= item.quantity:
+             return jsonify({'success': False, 'error': 'Not enough stock'}), 400
+        item.quantity += 1
+    elif action == 'decrease':
+        if item.quantity > 1:
+            item.quantity -= 1
+        else:
+             # delete if 0? For now keep at 1 or allow client to call remove
+             pass
+             
+    db.session.commit()
+    
+    # Recalculate item total and possible subtotal can be done on client or returned
+    return jsonify({
+        'success': True, 
+        'quantity': item.quantity,
+        'item_total': item.book.price * item.quantity if item.action == 'buy' else 0,
+        'price': item.book.price
+    })
 
 @bp.route('/cart/remove/<int:item_id>')
 @login_required

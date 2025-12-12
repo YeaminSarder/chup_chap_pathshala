@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Checkout</h1>
+    <a href="{{ url_for('main.view_cart') }}"
+        style="color: #4F46E5; font-weight: 500; text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
+        &larr; Back to Cart
+    </a>
+</div>
+
+<form action="{{ url_for('main.confirm_checkout') }}" method="POST">
+    <!-- Hidden Fields -->
+    <input type="hidden" name="selected_ids" value="{{ selected_ids }}">
+    <input type="hidden" name="coupon_code" value="{{ coupon_code or '' }}">
+    
+    <div style="display: grid; grid-template-columns: 1fr 400px; gap: 2rem; align-items: start;">
+        
+        <!-- Shipping Information -->
+        <div class="card">
+            <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; color: #111827;">Shipping Information</h2>
+            
+            <div style="display: grid; gap: 1.5rem;">
+                <!-- Name -->
+                <div>
+                    <label style="display: block; font-weight: 500; margin-bottom: 0.5rem; color: #374151;">Full Name</label>
+                    <input type="text" name="name" required value="{{ current_user.username }}"
+                        style="width: 100%; padding: 0.75rem; border: 1px solid #D1D5DB; border-radius: 0.5rem; outline: none;">
+                </div>
+                
+                <!-- Phone -->
+                <div>
+                    <label style="display: block; font-weight: 500; margin-bottom: 0.5rem; color: #374151;">Phone Number</label>
+                    <input type="tel" name="phone" required placeholder="017..."
+                        style="width: 100%; padding: 0.75rem; border: 1px solid #D1D5DB; border-radius: 0.5rem; outline: none;">
+                </div>
+                
+                <!-- Address -->
+                <div>
+                    <label style="display: block; font-weight: 500; margin-bottom: 0.5rem; color: #374151;">Address</label>
+                    <textarea name="address" required rows="3" placeholder="House #, Road #, Area..."
+                        style="width: 100%; padding: 0.75rem; border: 1px solid #D1D5DB; border-radius: 0.5rem; outline: none; font-family: inherit;"></textarea>
+                </div>
+                
+                <!-- City -->
+                <div>
+                    <label style="display: block; font-weight: 500; margin-bottom: 0.5rem; color: #374151;">City</label>
+                    <select name="city" required 
+                        style="width: 100%; padding: 0.75rem; border: 1px solid #D1D5DB; border-radius: 0.5rem; outline: none; background: white;">
+                        <option value="Dhaka">Dhaka</option>
+                        <option value="Chittagong">Chittagong</option>
+                        <option value="Sylhet">Sylhet</option>
+                        <option value="Rajshahi">Rajshahi</option>
+                        <option value="Khulna">Khulna</option>
+                        <option value="Barisal">Barisal</option>
+                        <option value="Rangpur">Rangpur</option>
+                        <option value="Mymensingh">Mymensingh</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="card" style="position: sticky; top: 2rem;">
+            <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; color: #111827;">Order Summary</h2>
+            
+            <div style="margin-bottom: 1.5rem; max-height: 300px; overflow-y: auto;">
+                {% for item in items %}
+                <div style="display: flex; gap: 1rem; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #E5E7EB;">
+                     <div style="width: 50px; height: 75px; background: #F3F4F6; border-radius: 4px; overflow: hidden; flex-shrink: 0;">
+                        <img src="{{ item.book.image_url or 'https://placehold.co/50x75?text=Img' }}" alt=""
+                            style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; color: #111827; font-size: 0.95rem;">{{ item.book.title }}</div>
+                        <div style="font-size: 0.85rem; color: #6B7280;">Qty: {{ item.quantity }}</div>
+                        {% if item.action == 'buy' %}
+                        <div style="font-weight: 500; color: #4F46E5; margin-top: 0.25rem;">TK {{ item.book.price * item.quantity }}</div>
+                        {% else %}
+                        <div style="font-size: 0.85rem; color: #10B981; margin-top: 0.25rem;">Borrow</div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; color: #4B5563;">
+                <span>Subtotal</span>
+                <span style="font-weight: 600;">TK {{ subtotal }}</span>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; color: #4B5563;">
+                <span>Delivery Charge</span>
+                <span style="font-weight: 600;">TK {{ delivery_charge }}</span>
+            </div>
+            
+            {% if discount > 0 %}
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; color: #10B981;">
+                <span>Discount</span>
+                <span style="font-weight: 600;">- TK {{ discount }}</span>
+            </div>
+            {% endif %}
+
+            <div style="height: 1px; background: #E5E7EB; margin: 1rem 0;"></div>
+
+            <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem; font-size: 1.25rem; font-weight: 700; color: #111827;">
+                <span>Total</span>
+                <span style="color: #4F46E5;">TK {{ total }}</span>
+            </div>
+
+            <button type="submit" class="btn-action btn-buy" style="font-size: 1.1rem; padding: 1rem;">
+                Place Order
+            </button>
+            
+            <div style="margin-top: 1rem; font-size: 0.875rem; color: #6B7280; text-align: center;">
+                By placing this order, you agree to our Terms of Service.
+            </div>
+        </div>
+        
+    </div>
+</form>
+{% endblock %}

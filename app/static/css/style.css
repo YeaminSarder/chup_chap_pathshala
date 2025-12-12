@@ -344,7 +344,7 @@ body {
     background: var(--white);
     border-radius: 1rem;
     box-shadow: var(--shadow);
-    margin-top: 1rem;
+    margin-top: 0;
 }
 
 .table {
@@ -355,7 +355,7 @@ body {
 
 .table th,
 .table td {
-    padding: 1rem 1.5rem;
+    padding: 1rem 0.75rem;
     text-align: left;
     border-bottom: 1px solid #E5E7EB;
 }
