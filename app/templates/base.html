@@ -17,7 +17,8 @@
         <!-- Logo Section -->
         <div class="logo-section">
             <a href="{{ url_for('main.index') }}" class="nav-brand">
-                <img src="{{ url_for('static', filename='images/cp logo.png') }}" alt="Logo" class="brand-icon" style="width: 40px; height: 40px; object-fit: contain;">
+                <img src="{{ url_for('static', filename='images/cp logo.png') }}" alt="Logo" class="brand-icon"
+                    style="width: 40px; height: 40px; object-fit: contain;">
                 <div class="brand-text mr-4">
                     <span>CHUPCHAP</span>
                     <span>PATHSHALA</span>
@@ -28,7 +29,8 @@
         <!-- Search Bar -->
         <div class="search-section relative">
             <form action="{{ url_for('main.search') }}" method="GET" class="search-form w-full relative">
-                <input type="text" name="q" id="searchInput" placeholder="Search books..." class="search-input w-full min-w-24" autocomplete="off">
+                <input type="text" name="q" id="searchInput" placeholder="Search books..."
+                    class="search-input w-full min-w-24" autocomplete="off">
                 <button type="submit" class="search-btn">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="11" cy="11" r="8"></circle>
@@ -36,15 +38,17 @@
                     </svg>
                 </button>
                 <!-- Autocomplete Dropdown -->
-                <div id="suggestions" class="absolute top-full left-0 w-full bg-white rounded-lg shadow-md border border-gray-100 hidden z-50 overflow-hidden mt-4">
-                    
+                <div id="suggestions"
+                    class="absolute top-full left-0 w-full bg-white rounded-lg shadow-md border border-gray-100 hidden z-50 overflow-hidden mt-4">
+
                 </div>
             </form>
         </div>
 
         <!-- Navigation Links (Pill shaped) -->
         <div class="nav-links">
-            <!--a href="{{ url_for('main.catalog') }}" class="nav-pill">Todays Offer</a-->
+            <a href="{{ url_for('main.index') }}" class="nav-pill">Home</a>
+            <a href="{{ url_for('main.catalog') }}" class="nav-pill">Todays Offer</a>
             <a href="{{ url_for('main.catalog') }}" class="nav-pill">E-Book</a>
             {% if current_user.is_authenticated and current_user.is_admin() %}
             <a href="{{ url_for('main.members') }}" class="nav-pill"
@@ -105,17 +109,17 @@
             {% endif %}
             {% endwith %}
         </div>
-        
+
         <!-- Auto-dismiss alerts -->
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 const alerts = document.querySelectorAll('.alert');
                 alerts.forEach(alert => {
                     setTimeout(() => {
                         alert.style.transition = 'opacity 0.5s ease';
                         alert.style.opacity = '0';
                         setTimeout(() => alert.remove(), 500);
-                    }, 3000); 
+                    }, 3000);
                 });
             });
         </script>
@@ -170,7 +174,8 @@
             <div class="footer-col">
                 <h4>JOIN US</h4>
                 <div class="social-icons">
-                    <a href="https://www.facebook.com/ahmadialibrarybarura/" class="social-link fb"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://www.facebook.com/ahmadialibrarybarura/" class="social-link fb"><i
+                            class="fab fa-facebook-f"></i></a>
                     <a href="#" class="social-link insta"><i class="fab fa-instagram"></i></a>
                     <a href="#" class="social-link wa"><i class="fab fa-whatsapp"></i></a>
                     <a href="#" class="social-link tw"><i class="fab fa-twitter"></i></a>
@@ -178,13 +183,13 @@
             </div>
         </div>
     </footer>
-    
+
     <script>
         const searchInput = document.getElementById('searchInput');
         const suggestionsBox = document.getElementById('suggestions');
         let currentFocus = -1; // Track keyboard selection
 
-        searchInput.addEventListener('input', function() {
+        searchInput.addEventListener('input', function () {
             const query = this.value;
             currentFocus = -1; // Reset focus on new input
 
@@ -211,17 +216,17 @@
                                     <span>${title}</span>
                                 </div>
                             `;
-                            
-                            
+
+
                             div.className = 'suggestion-row px-4 py-3 cursor-pointer text-sm text-gray-800 font-medium transition-colors duration-150 border-b border-gray-100 last:border-0';
-                            
-                            
-                            div.addEventListener('click', function() {
+
+
+                            div.addEventListener('click', function () {
                                 selectSuggestion(title);
                             });
 
-                            
-                            div.addEventListener('mouseenter', function() {
+
+                            div.addEventListener('mouseenter', function () {
                                 currentFocus = index;
                                 updateActiveSuggestion(suggestionsBox.children);
                             });
@@ -238,7 +243,7 @@
         });
 
         // Keyboard Navigation
-        searchInput.addEventListener('keydown', function(e) {
+        searchInput.addEventListener('keydown', function (e) {
             const items = suggestionsBox.children;
             if (items.length === 0) return;
 
@@ -287,7 +292,7 @@
         }
 
         // Close suggestions when clicking outside
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
                 closeSuggestions();
             }
@@ -295,17 +300,17 @@
 
 
         // Intercept Add to Cart Forms
-        document.addEventListener('submit', function(e) {
+        document.addEventListener('submit', function (e) {
             if (e.target && e.target.action && e.target.action.includes('/cart/add/')) {
                 e.preventDefault();
                 const form = e.target;
-                const button = form.querySelector('button[type="submit"]:hover') || form.querySelector('button[type="submit"]'); 
+                const button = form.querySelector('button[type="submit"]:hover') || form.querySelector('button[type="submit"]');
                 // Note: :hover is a heuristic, better to rely on submitter if supported or just grab the first one if only one exists usually.
                 // Better approach with e.submitter if available (modern browsers)
                 const submitter = e.submitter;
-                
+
                 const originalText = submitter ? submitter.innerHTML : (button ? button.innerHTML : 'Submit');
-                
+
                 if (submitter) {
                     submitter.disabled = true;
                     submitter.innerHTML = '<span class="upload-spinner" style="display:inline-block; position:static; font-size:1em;">↻</span>';
@@ -323,40 +328,40 @@
                         'X-Requested-With': 'XMLHttpRequest'
                     }
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Update badge
-                        const existingBadge = document.querySelector('.cart-badge');
-                        if (existingBadge) {
-                            existingBadge.textContent = data.cart_count;
-                        } else {
-                            const iconContainer = document.querySelector('.cart-icon');
-                            if (iconContainer) {
-                                const newBadge = document.createElement('span');
-                                newBadge.className = 'cart-badge';
-                                newBadge.textContent = data.cart_count;
-                                iconContainer.appendChild(newBadge);
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Update badge
+                            const existingBadge = document.querySelector('.cart-badge');
+                            if (existingBadge) {
+                                existingBadge.textContent = data.cart_count;
+                            } else {
+                                const iconContainer = document.querySelector('.cart-icon');
+                                if (iconContainer) {
+                                    const newBadge = document.createElement('span');
+                                    newBadge.className = 'cart-badge';
+                                    newBadge.textContent = data.cart_count;
+                                    iconContainer.appendChild(newBadge);
+                                }
                             }
+
+                            // Temporary Button Feedback
+
+                        } else {
+                            // Fallback
+                            window.location.href = form.action;
                         }
-                        
-                        // Temporary Button Feedback
-                        
-                    } else {
-                        // Fallback
-                        window.location.href = form.action;
-                    }
-                })
-                .catch(err => {
-                    console.error('AJAX Error:', err);
-                    form.submit(); // Fallback
-                })
-                .finally(() => {
-                    if (submitter) {
-                        submitter.disabled = false;
-                        submitter.innerHTML = originalText;
-                    }
-                });
+                    })
+                    .catch(err => {
+                        console.error('AJAX Error:', err);
+                        form.submit(); // Fallback
+                    })
+                    .finally(() => {
+                        if (submitter) {
+                            submitter.disabled = false;
+                            submitter.innerHTML = originalText;
+                        }
+                    });
             }
         });
     </script>
