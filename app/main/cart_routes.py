@@ -9,8 +9,8 @@ from app.models import Book, Cart, CartItem
 def add_to_cart(book_id):
     book = Book.query.get_or_404(book_id)
     action = request.form.get('action') # 'borrow' or 'buy'
-    
     # Borrowing specific checks
+    qty = int(request.form.get('qty',"1"))
     if action == 'borrow':
         if book.item_type == 'sale':
             flash('This item is for Sale only.', 'danger')
@@ -29,9 +29,9 @@ def add_to_cart(book_id):
     # Add Item
     cart_item = CartItem.query.filter_by(cart=cart, book=book, action=action).first()
     if cart_item:
-        cart_item.quantity += 1
+        cart_item.quantity += qty
     else:
-        cart_item = CartItem(cart=cart, book=book, quantity=1, action=action)
+        cart_item = CartItem(cart=cart, book=book, quantity=qty, action=action)
         db.session.add(cart_item)
         
     db.session.commit()

@@ -1,3 +1,4 @@
+
 <div class="mb-12">
     <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl text-gray-900 font-bold">Popular Books</h2>
@@ -70,14 +71,19 @@
         <div class="mt-4 flex flex-col gap-2">
             <form action="{{ url_for('main.add_to_cart', book_id=book.id) }}" method="POST" class="w-full">
 
-                {% if book.item_type in ['sale', 'hybrid'] and book.stock_available > 0 %}
+              {% if book.item_type in ['sale', 'hybrid'] and book.stock_available > 0 %}
+				<div class="group flex m-2 p-0">
+				  <div class = "group-hover:block hidden myplusminus myplusminus_disable" disabled onclick={{"handle_remove(this.nextElementSibling," ~ book.stock_available ~ ")"}}> - </div>
+				  <input hidden name="qty" value=1>
                 <button 
                     type="submit" 
                     name="action" 
                     value="buy"
-                    class="w-full m-2 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-md font-medium">
+                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-md font-medium">
                     Buy
                 </button>
+				<div class = "group-hover:block hidden myplusminus myplusminus_enable" onclick={{"handle_add(this.previousElementSibling.previousElementSibling," ~ book.stock_available - current_user.cart. ~ ")"}}> + </div>
+				</div>
                 {% endif %}
 
                 {% if book.item_type in ['circulation', 'hybrid'] and book.stock_available > 0 %}
@@ -111,3 +117,65 @@
         {% endfor %}
     </div>
 </div>
+<script>
+  function handle_add(elem, stock) {
+  btn = elem.nextElementSibling
+  plus = btn.nextElementSibling
+  minus = elem.previousElementSibling
+  if (plus.disabled) {
+      alert("no more books on stock")
+      elem.value = stock
+      return
+  }
+
+  elem.value = elem.value*1 + 1
+  minus.disabled = false
+  sync_disable(minus)
+  
+
+  if (stock == elem.value) {
+  plus.disabled = true
+  sync_disable(plus)
+  }
+  if (elem.value > 1) {
+      btn.innerHTML = btn.value + " x" + elem.value
+  } else {
+      btn.innerHTML = btn.value
+  }
+  }
+  function handle_remove(elem, stock) {
+  btn = elem.nextElementSibling
+  plus = btn.nextElementSibling
+  minus = elem.previousElementSibling
+  if (minus.disabled) {
+      alert("cant go below 1")
+      elem.value = 1
+      return
+  }
+
+  elem.value = elem.value*1 - 1
+  plus.disabled = false
+  sync_disable(plus)
+  
+  if (elem.value == 1) {
+  minus.disabled = true
+  sync_disable(minus)
+  }
+  if (elem.value > 1) {
+      btn.innerHTML = btn.value + " x" + elem.value
+  } else {
+      btn.innerHTML = btn.value
+  }
+  }
+
+  function sync_disable(elem) {
+  if (elem.disabled) {
+  elem.classList.add("myplusminus_disable")
+  elem.classList.remove("myplusminus_enable")
+  } else {
+  elem.classList.add("myplusminus_enable")
+  elem.classList.remove("myplusminus_disable")
+  }
+  
+  }
+</script>

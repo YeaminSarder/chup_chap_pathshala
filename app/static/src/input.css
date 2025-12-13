@@ -7,3 +7,14 @@
 .field {
     @apply w-full p-3 border border-gray-300 rounded-lg;
 }
+
+.myplusminus {
+	@apply text-3xl text-center p-2 rounded-lg font-bold ml-1 mr-1 select-none;
+}
+
+.myplusminus_disable {
+	@apply bg-indigo-100 text-white
+}
+.myplusminus_enable {
+	@apply bg-indigo-600 text-white
+}

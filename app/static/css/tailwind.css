@@ -799,6 +799,9 @@
   .object-cover {
     object-fit: cover;
   }
+  .p-0 {
+    padding: calc(var(--spacing) * 0);
+  }
   .p-1 {
     padding: calc(var(--spacing) * 1);
   }
@@ -1145,6 +1148,13 @@
     -webkit-user-select: none;
     user-select: none;
   }
+  .group-hover\:block {
+    &:is(:where(.group):hover *) {
+      @media (hover: hover) {
+        display: block;
+      }
+    }
+  }
   .group-hover\:scale-110 {
     &:is(:where(.group):hover *) {
       @media (hover: hover) {
@@ -1451,6 +1461,27 @@
   border-width: 1px;
   border-color: var(--color-gray-300);
   padding: calc(var(--spacing) * 3);
+}
+.myplusminus {
+  margin-right: calc(var(--spacing) * 1);
+  margin-left: calc(var(--spacing) * 1);
+  border-radius: var(--radius-lg);
+  padding: calc(var(--spacing) * 2);
+  text-align: center;
+  font-size: var(--text-3xl);
+  line-height: var(--tw-leading, var(--text-3xl--line-height));
+  --tw-font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-bold);
+  -webkit-user-select: none;
+  user-select: none;
+}
+.myplusminus_disable {
+  background-color: var(--color-indigo-100);
+  color: var(--color-white);
+}
+.myplusminus_enable {
+  background-color: var(--color-indigo-600);
+  color: var(--color-white);
 }
 @property --tw-translate-x {
   syntax: "*";
