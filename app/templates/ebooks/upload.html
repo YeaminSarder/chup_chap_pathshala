@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}Upload E-Book - ChupChap Pathshala{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto py-8">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">Upload New E-Book</h2>
+            <a href="{{ url_for('main.ebook_list') }}" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+            </a>
+        </div>
+
+        <form action="{{ url_for('main.ebook_upload') }}" method="POST" enctype="multipart/form-data">
+            <div class="space-y-6">
+                <!-- Title -->
+                <div>
+                    <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Book Title</label>
+                    <input type="text" name="title" id="title" required
+                        class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 shadow-sm py-3 px-4 text-lg"
+                        placeholder="e.g. Paradoxical Sajid">
+                </div>
+
+                <!-- Author -->
+                <div>
+                    <label for="author" class="block text-sm font-medium text-gray-700 mb-1">Author</label>
+                    <input type="text" name="author" id="author" required
+                        class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 shadow-sm py-3 px-4 text-lg"
+                        placeholder="e.g. Arif Azad">
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea name="description" id="description" rows="3"
+                        class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 shadow-sm py-3 px-4 text-lg"></textarea>
+                </div>
+
+                <!-- Setup Rows (Same Grid Layout) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- PDF File -->
+                    <div>
+                        <label for="file" class="block text-sm font-medium text-gray-700 mb-1">PDF File</label>
+                        <div
+                            class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:bg-gray-50 transition-colors h-full flex flex-col justify-center">
+                            <div class="space-y-1 text-center">
+                                <i class="fas fa-file-pdf text-3xl text-gray-400"></i>
+                                <div class="flex text-sm text-gray-600 justify-center">
+                                    <label for="file-upload"
+                                        class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
+                                        <span>Upload a file</span>
+                                        <input id="file-upload" name="file" type="file" class="sr-only" accept=".pdf"
+                                            required onchange="updateFileName(this)">
+                                    </label>
+                                </div>
+                                <p class="text-xs text-gray-500">PDF up to 10MB</p>
+                                <p id="file-name" class="text-sm font-medium text-gray-900 mt-2 hidden"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cover Image -->
+                    <div>
+                        <label for="cover_image" class="block text-sm font-medium text-gray-700 mb-1">Cover Image
+                            (Optional)</label>
+                        <div
+                            class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:bg-gray-50 transition-colors h-full flex flex-col justify-center">
+                            <div class="space-y-1 text-center">
+                                <i class="fas fa-image text-3xl text-gray-400"></i>
+                                <div class="flex text-sm text-gray-600 justify-center">
+                                    <label for="cover-upload"
+                                        class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
+                                        <span>Upload Cover Image</span>
+                                        <input id="cover-upload" name="cover_image" type="file" class="sr-only"
+                                            accept="image/*" onchange="updateCoverName(this)">
+                                    </label>
+                                </div>
+                                <p class="text-xs text-gray-500">PNG, JPG, GIF</p>
+                                <p id="cover-name" class="text-sm font-medium text-gray-900 mt-2 hidden"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Audio File -->
+                    <div class="md:col-span-2">
+                        <label for="audio_file" class="block text-sm font-medium text-gray-700 mb-1">Audio Version
+                            (Optional)</label>
+                        <div
+                            class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:bg-gray-50 transition-colors">
+                            <div class="space-y-1 text-center">
+                                <i class="fas fa-music text-3xl text-gray-400"></i>
+                                <div class="flex text-sm text-gray-600 justify-center">
+                                    <label for="audio-upload"
+                                        class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
+                                        <span>Upload Audio File</span>
+                                        <input id="audio-upload" name="audio_file" type="file" class="sr-only"
+                                            accept=".mp3,.wav" onchange="updateAudioName(this)">
+                                    </label>
+                                    <p class="pl-1">or drag and drop</p>
+                                </div>
+                                <p class="text-xs text-gray-500">MP3, WAV up to 50MB</p>
+                                <p id="audio-name" class="text-sm font-medium text-gray-900 mt-2 hidden"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-end">
+                    <button type="submit"
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition duration-150 transform hover:scale-105"
+                        style="width: 100%;">
+                        <i class="fas fa-cloud-upload-alt mr-2"></i>Upload E-Book
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function updateFileName(input) {
+        const fileName = input.files[0] ? input.files[0].name : '';
+        const display = document.getElementById('file-name');
+        if (fileName) {
+            display.textContent = fileName;
+            display.classList.remove('hidden');
+        } else {
+            display.classList.add('hidden');
+        }
+    }
+    function updateCoverName(input) {
+        const fileName = input.files[0] ? input.files[0].name : '';
+        const display = document.getElementById('cover-name');
+        if (fileName) {
+            display.textContent = fileName;
+            display.classList.remove('hidden');
+        } else {
+            display.classList.add('hidden');
+        }
+    }
+    function updateAudioName(input) {
+        const fileName = input.files[0] ? input.files[0].name : '';
+        const display = document.getElementById('audio-name');
+        if (fileName) {
+            display.textContent = fileName;
+            display.classList.remove('hidden');
+        } else {
+            display.classList.add('hidden');
+        }
+    }
+</script>
+{% endblock %}

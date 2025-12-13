@@ -166,3 +166,17 @@ class SupplyOrderItem(db.Model):
     
     mass = db.Column(db.Integer, default=5) # Ordered Quantity
     payload = db.Column(db.Integer, nullable=True) # Received/Actual Quantity
+
+class EBook(db.Model):
+    __tablename__ = 'ebooks'
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(140), nullable=False)
+    author = db.Column(db.String(140), nullable=False)
+    description = db.Column(db.Text)
+    cover_image_url = db.Column(db.String(500), default='https://placehold.co/200x300?text=No+Cover')
+    file_path = db.Column(db.String(500), nullable=False) # Path relative to static folder
+    audio_path = db.Column(db.String(500), nullable=True) # Path to audio file
+    uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<EBook {self.title}>'

@@ -114,6 +114,65 @@ body {
     background-color: #D1D5DB;
 }
 
+/* Custom Colored Pills (Members, Inventory, Order) */
+.nav-pill-purple {
+    background-color: #F3E8FF;
+    color: #7E22CE;
+}
+
+.nav-pill-purple:hover {
+    background-color: #E9D5FF;
+}
+
+.nav-pill-green {
+    background-color: #ECFDF5;
+    color: #047857;
+}
+
+.nav-pill-green:hover {
+    background-color: #D1FAE5;
+}
+
+.nav-pill-blue {
+    background-color: #E0F2FE;
+    color: #0369A1;
+}
+
+.nav-pill-blue:hover {
+    background-color: #BAE6FD;
+}
+
+/* Navbar Dropdown Fallback */
+.dropdown-container:hover .dropdown-menu {
+    display: block !important;
+}
+
+/* Invisible bridge for hover gap */
+.dropdown-menu::before {
+    content: '';
+    position: absolute;
+    top: -15px;
+    left: 0;
+    width: 100%;
+    height: 15px;
+}
+
+/* Navbar Dropdown Items */
+.dropdown-item {
+    display: block;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    color: #374151;
+    text-decoration: none;
+    transition: all 0.2s;
+    border-radius: 0.5rem;
+}
+
+.dropdown-item:hover {
+    background-color: #E0F2FE;
+    color: #0369A1;
+}
+
 /* User Actions */
 .user-actions {
     display: flex;

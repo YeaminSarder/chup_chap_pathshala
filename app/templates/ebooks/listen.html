@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Listening: {{ ebook.title }} - ChupChap Pathshala{% endblock %}
+
+{% block content %}
+<div
+    class="py-6 min-h-[calc(100vh-100px)] flex flex-col items-center justify-center bg-gradient-to-b from-purple-50 to-white">
+    <div class="w-full max-w-md">
+        <!-- Back Link -->
+        <a href="{{ url_for('main.ebook_list') }}"
+            class="text-gray-500 hover:text-gray-700 flex items-center mb-6 pl-4">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Library
+        </a>
+
+        <!-- Player Card -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+            <!-- Cover Art -->
+            <div class="aspect-square w-full relative group">
+                <img src="{{ ebook.cover_image_url }}" alt="{{ ebook.title }}" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-black bg-opacity-10"></div>
+            </div>
+
+            <!-- Track Info -->
+            <div class="p-8 text-center">
+                <h1 class="text-2xl font-bold text-gray-800 mb-2">{{ ebook.title }}</h1>
+                <p class="text-purple-600 font-medium">{{ ebook.author }}</p>
+
+                <!-- Audio Player -->
+                <div class="mt-8">
+                    <audio controls class="w-full" autoplay>
+                        <source src="{{ url_for('static', filename='ebooks/audio/' + ebook.audio_path) }}"
+                            type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

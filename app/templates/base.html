@@ -49,21 +49,39 @@
         <div class="nav-links">
             <a href="{{ url_for('main.index') }}" class="nav-pill">Home</a>
             <a href="{{ url_for('main.catalog') }}" class="nav-pill">Todays Offer</a>
-            <a href="{{ url_for('main.catalog') }}" class="nav-pill">E-Book</a>
+            <a href="{{ url_for('main.ebook_list') }}" class="nav-pill">E-Book</a>
             {% if current_user.is_authenticated and current_user.is_admin() %}
-            <a href="{{ url_for('main.members') }}" class="nav-pill"
-                style="background-color: #F3E8FF; color: #7E22CE;">Members</a> {% endif %}
+            <a href="{{ url_for('main.members') }}" class="nav-pill nav-pill-purple">Members</a> {% endif %}
             {% if current_user.is_authenticated and current_user.is_staff() %}
-            <a href="{{ url_for('main.inventory') }}" class="nav-pill"
-                style="background-color: #ECFDF5; color: #047857;">Inventory</a>
-            <a href="{{ url_for('main.supplier_shortlist') }}" class="nav-pill"
-                style="background-color: #E0F2FE; color: #0369A1;">Supplier Order</a>
-            <a href="{{ url_for('main.supplier_receive_list') }}" class="nav-pill"
-                style="background-color: #F0F9FF; color: #075985;">Receive</a>
+            <a href="{{ url_for('main.inventory') }}" class="nav-pill nav-pill-green">Inventory</a>
             {% endif %}
-            {% if current_user.is_authenticated and current_user.is_admin() %}
-            <a href="{{ url_for('main.supplier_review') }}" class="nav-pill"
-                style="background-color: #FEF3C7; color: #92400E;">Review Orders</a>
+            {% if current_user.is_authenticated and (current_user.is_staff() or current_user.is_admin()) %}
+            <div class="relative group dropdown-container">
+                <button class="nav-pill nav-pill-blue flex items-center gap-1"
+                    onclick="document.getElementById('order-menu').classList.toggle('hidden')">
+                    Order <i class="fas fa-chevron-down text-xs"></i>
+                </button>
+                <div id="order-menu"
+                    class="absolute left-0 top-full mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-100 hidden group-hover:block dropdown-menu z-50">
+                    <div>
+                        {% if current_user.is_staff() %}
+                        <a href="{{ url_for('main.supplier_shortlist') }}"
+                            class="dropdown-item dropdown-item-blue">Supplier
+                            Order</a>
+                        {% endif %}
+
+                        {% if current_user.is_admin() %}
+                        <a href="{{ url_for('main.supplier_review') }}" class="dropdown-item dropdown-item-amber">Review
+                            Order</a>
+                        {% endif %}
+
+                        {% if current_user.is_staff() %}
+                        <a href="{{ url_for('main.supplier_receive_list') }}"
+                            class="dropdown-item dropdown-item-sky">Receive</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
             {% endif %}
         </div>
 

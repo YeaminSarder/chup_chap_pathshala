@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reading: {{ ebook.title }} - ChupChap Pathshala</title>
+    <!-- Use same styles as base for consistency -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 50;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 16px;
+            border-radius: 9999px;
+            /* full pill */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+            color: #374151;
+            transition: all 0.2s;
+            text-decoration: none;
+            backdrop-filter: blur(4px);
+        }
+
+        .back-btn:hover {
+            background: #fff;
+            color: #111827;
+            transform: translateY(-1px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Floating Back Button -->
+    <a href="{{ url_for('main.ebook_list') }}" class="back-btn">
+        <i class="fas fa-arrow-left mr-2"></i> Back to Library
+    </a>
+
+    <!-- Full Screen PDF Viewer -->
+    {% if ebook.file_path %}
+    <iframe src="{{ url_for('static', filename='ebooks/' + ebook.file_path) }}" allowfullscreen>
+        <p>Your browser does not support iframes.</p>
+    </iframe>
+    {% else %}
+    <div class="flex items-center justify-center h-full bg-gray-50">
+        <div class="text-center">
+            <i class="fas fa-exclamation-circle text-4xl text-red-400 mb-3"></i>
+            <p class="text-gray-600 font-medium">PDF file not found.</p>
+            <a href="{{ url_for('main.ebook_list') }}" class="text-blue-600 hover:underline mt-2 inline-block">Return to
+                E-Library</a>
+        </div>
+    </div>
+    {% endif %}
+
+</body>
+
+</html>
