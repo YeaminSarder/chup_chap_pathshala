@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}LMS{% endblock %} - ChupChap Pathshala</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=3">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=4">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
@@ -30,10 +30,7 @@
             <a href="{{ url_for('main.index') }}" class="nav-brand">
                 <img src="{{ url_for('static', filename='images/cp logo.png') }}" alt="Logo" class="brand-icon"
                     style="width: 60px; height: 60px; object-fit: contain;">
-                <!-- <div class="brand-text mr-4">
-                    <span>CHUPCHAP</span>
-                    <span>PATHSHALA</span>
-                </div> -->
+                
             </a>
         </div>
 

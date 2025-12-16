@@ -51,6 +51,13 @@
     filter: invert(1) hue-rotate(180deg);
 }
 
+/* Select Dropdown Dark Mode Fix */
+[data-theme="dark"] select,
+[data-theme="dark"] select option {
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+}
+
 [data-theme="dark"] .book-thumb-img[src*="placehold.co"] {
     filter: invert(1) hue-rotate(180deg);
 }
@@ -509,7 +516,7 @@ body {
     background-color: #4338ca;
 }
 
-/* Extra Tailwind-like Utilities used in Login */
+/* Tailwind-like Utilities used in Login */
 .justify-center {
     justify-content: center !important;
 }
@@ -570,8 +577,7 @@ body {
 
 }
 
-/* When suggestions are active */
-/* When suggestions are active */
+
 .search-form.has-suggestions {
     background-color: var(--pill-bg);
     /* Was #e5e7eb */
@@ -738,9 +744,7 @@ body {
 
 .profile-info-section {
     padding-top: 1rem;
-    /* Space for avatar overlap */
     padding-left: 14rem;
-    /* Adjusted for avatar width + margin */
     padding-right: 2rem;
     min-height: 80px;
     display: flex;
@@ -774,13 +778,11 @@ body {
         left: 50%;
         transform: translateX(-50%);
         bottom: 60px;
-        /* Push it up into the cover more or center it */
     }
 
     .profile-info-section {
         padding-left: 1rem;
         padding-top: 5rem;
-        /* Push down to clear avatar */
         justify-content: center;
         text-align: center;
     }
@@ -801,10 +803,9 @@ body {
 .search-suggestion-item:hover,
 .search-suggestion-item.active {
     background-color: var(--bg-color) !important;
-    /* or var(--pill-hover) */
 }
 
-/* Fix icon color in dark mode */
+/* icon color in dark mode */
 .search-suggestion-item .suggestion-icon {
     color: var(--text-muted);
 }
@@ -842,7 +843,7 @@ body {
     font-size: 0.9em;
 }
 
-/* Discount Badge - Starburst */
+/* Discount Badge */
 .discount-badge {
     position: absolute;
     top: -10px;
@@ -850,7 +851,6 @@ body {
     width: 60px;
     height: 60px;
     background-color: #DC2626;
-    /* Red-600 */
     color: white;
     font-weight: 800;
     display: flex;
@@ -862,7 +862,6 @@ body {
     z-index: 20;
     transform: rotate(15deg);
     filter: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.3));
-    /* Starburst Shape */
     clip-path: polygon(50% 0%, 61% 10%, 75% 6%, 81% 19%, 94% 21%, 93% 35%, 100% 44%, 93% 56%,
             99% 68%, 87% 76%, 86% 90%, 72% 92%, 63% 100%, 50% 92%, 37% 100%, 28% 92%,
             14% 90%, 13% 76%, 1% 68%, 7% 56%, 0% 44%, 7% 35%, 6% 21%, 19% 19%, 25% 6%,
@@ -880,7 +879,41 @@ body {
     font-weight: 700;
 }
 
-/* Utility to ensure strikethrough works if Tailwind is missing it */
+
 .line-through {
     text-decoration: line-through;
+}
+
+/* Form Styles for Dark Mode Support */
+.label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.field {
+    width: 100%;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.field:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+}
+
+.btn-cancel {
+    background-color: var(--pill-bg);
+    color: var(--text-color);
+    transition: background-color 0.2s;
+}
+
+.btn-cancel:hover {
+    background-color: var(--pill-hover);
 }

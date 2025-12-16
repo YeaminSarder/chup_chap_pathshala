@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Config:
-    APPROVED_ADMIN_DOMAINS = ['@chupchappathshala.com','@gmail.com']
+    APPROVED_ADMIN_DOMAINS = ['@gmail.com']
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
     GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", None)
     GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", None)
@@ -23,7 +23,7 @@ class Config:
 
     # Email Config
     MAIL_SERVER = os.environ.get('MAIL_SERVER') or 'localhost'
-    MAIL_PORT = int(os.environ.get('MAIL_PORT') or 8025) # Default to debugging port
+    MAIL_PORT = int(os.environ.get('MAIL_PORT') or 8025) 
     MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS') is not None
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')

@@ -2,7 +2,7 @@ from flask import render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from app.main import bp
 from app import db
-from app.models import Book, SupplyOrder, SupplyOrderItem, User
+from app.models import Book, SupplyOrder, SupplyOrderItem, User, Supplier
 
 THRESHOLD = 5
 
@@ -22,10 +22,10 @@ def supplier_shortlist():
         flash('Access denied: Staff only.', 'danger')
         return redirect(url_for('main.index'))
 
-    # 1. Access the Anti-Gravity Well (Get active bucket)
+    
     order = get_or_create_shortlist()
 
-    # 2. auto-pull: Anti-Gravity Effect
+
     # Find all low stock books
     low_stock_books = Book.query.filter(Book.stock_available < THRESHOLD).all()
     
@@ -34,10 +34,10 @@ def supplier_shortlist():
     
     items_added = 0
     for book in low_stock_books:
-        # If book defies gravity (low stock) and isn't already floating (in list)
+        # If book defies  (low stock) and isn't already floating (in list)
         if book.id not in existing_item_book_ids:
             # Lift it up!
-            new_item = SupplyOrderItem(order_id=order.id, book_id=book.id, mass=5) # Default mass
+            new_item = SupplyOrderItem(order_id=order.id, book_id=book.id, mass=5) 
             db.session.add(new_item)
             items_added += 1
     
@@ -79,25 +79,29 @@ def supplier_lift(book_id):
 @login_required
 def supplier_drop(item_id):
     item = SupplyOrderItem.query.get_or_404(item_id)
-    # Ensure we are modifying the shortlist
-    if item.order.status != 'shortlist':
+    # Ensure modifying the shortlist OR pending review
+    if item.order.status not in ['shortlist', 'pending_review']:
         flash('Cannot drop items from a locked order.', 'danger')
         return redirect(url_for('main.supplier_shortlist'))
         
     db.session.delete(item)
     db.session.commit()
-    flash('Gravity restored. Item dropped from shortlist.', 'success')
+    flash('Item dropped successfully.', 'success')
+    
+    # Redirect
+    if item.order.status == 'pending_review':
+        return redirect(url_for('main.supplier_review'))
     return redirect(url_for('main.supplier_shortlist'))
 
 @bp.route('/supplier/adjust_mass/<int:item_id>', methods=['POST'])
 @login_required
 def supplier_adjust_mass(item_id):
     item = SupplyOrderItem.query.get_or_404(item_id)
-    if item.order.status != 'shortlist':
+    if item.order.status not in ['shortlist', 'pending_review']:
         flash('Cannot adjust mass of a locked order.', 'danger')
         return redirect(url_for('main.supplier_shortlist'))
         
-    action = request.form.get('action') # 'increase' or 'decrease'
+    action = request.form.get('action') 
     
     if action == 'increase':
         item.mass += 1
@@ -106,6 +110,10 @@ def supplier_adjust_mass(item_id):
             item.mass -= 1
     
     db.session.commit()
+    
+    # Redirect
+    if item.order.status == 'pending_review':
+        return redirect(url_for('main.supplier_review'))
     return redirect(url_for('main.supplier_shortlist'))
 
 @bp.route('/supplier/submit_review', methods=['POST'])
@@ -129,9 +137,10 @@ def supplier_review():
         flash('Access denied: Owner/Admin only.', 'danger')
         return redirect(url_for('main.index'))
     
-    # Review Beacon: Find orders pending review
+    # Find orders pending review
     orders = SupplyOrder.query.filter_by(status='pending_review').all()
-    return render_template('supplier/review.html', orders=orders)
+    suppliers = Supplier.query.all()
+    return render_template('supplier/review.html', orders=orders, suppliers=suppliers)
 
 @bp.route('/supplier/launch/<int:order_id>', methods=['POST'])
 @login_required
@@ -140,12 +149,62 @@ def supplier_launch(order_id):
         return redirect(url_for('main.index'))
 
     order = SupplyOrder.query.get_or_404(order_id)
+    supplier_id = request.form.get('supplier_id')
+    if supplier_id:
+        order.supplier_id = int(supplier_id)
     order.status = 'placed'
-    # Here we would send email to supplier
+
     
     db.session.commit()
     flash('Order Authorized! & transmitted to supplier.', 'success')
-    return redirect(url_for('main.supplier_review'))
+    # Redirect to confirmation page instead of review list
+    return redirect(url_for('main.supplier_confirmation', order_id=order.id))
+
+@bp.route('/supplier/confirmation/<int:order_id>', methods=['GET'])
+@login_required
+def supplier_confirmation(order_id):
+    order = SupplyOrder.query.get_or_404(order_id)
+    
+    # WhatsApp Message
+    items = order.items.all()
+    item_details = "\n".join([f"- {item.book.title} (Qty: {item.mass})" for item in items])
+    whatsapp_text = f"Hello {order.supplier.name}, Here is supply order #{order.id}:\n\n{item_details}\n\nPlease check the attached invoice."
+    
+    return render_template('supplier/confirmation.html', order=order, whatsapp_text=whatsapp_text)
+
+@bp.route('/supplier/preview_invoice/<int:order_id>', methods=['GET'])
+@login_required
+def preview_invoice(order_id):
+    order = SupplyOrder.query.get_or_404(order_id)
+    return render_template('supplier/invoice.html', order=order)
+
+from io import BytesIO
+from xhtml2pdf import pisa
+from flask import make_response
+
+@bp.route('/supplier/download_invoice/<int:order_id>', methods=['GET'])
+@login_required
+def download_invoice(order_id):
+    order = SupplyOrder.query.get_or_404(order_id)
+    
+    # Render HTML template with data
+    html = render_template('supplier/invoice.html', order=order)
+    
+    # Create PDF buffer
+    buffer = BytesIO()
+    pisa_status = pisa.CreatePDF(html, dest=buffer)
+    
+    if pisa_status.err:
+        return 'We had some errors <pre>' + html + '</pre>'
+        
+    buffer.seek(0)
+    
+    # Create response
+    response = make_response(buffer.getvalue())
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f'attachment; filename=Invoice_{order.id}.pdf'
+    
+    return response
 
 @bp.route('/supplier/receive_list', methods=['GET'])
 @login_required
@@ -174,7 +233,7 @@ def supplier_update_payload(item_id):
         flash('Cannot update payload for this order.', 'danger')
         return redirect(url_for('main.supplier_receive_detail', order_id=item.order.id))
         
-    action = request.form.get('action') # 'increase' or 'decrease'
+    action = request.form.get('action') 
     
     # Initialize payload if None
     if item.payload is None:
@@ -199,10 +258,7 @@ def supplier_fusion(order_id):
         
     # INVENTORY FUSION
     for item in order.items:
-        # If payload wasn't set, assume full delivery (or 0? Let's assume full if untouched, or check logic. 
-        # Plan says "Librarian enters actual quantity". If they didn't touch it, item.payload is None.
-        # Let's default to item.mass if None, or 0? 
-        # "The system displays the ordered quantity as the default" -> implies payload default = mass.
+
         qty_received = item.payload if item.payload is not None else item.mass
         
         # Update Book Stock

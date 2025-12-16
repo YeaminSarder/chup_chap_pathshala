@@ -4,8 +4,8 @@
 
 {% block content %}
 
-<div class="max-w-md mx-auto bg-white p-8 rounded-2xl shadow">
-    <h1 class="text-xl font-semibold text-gray-800 mb-4">
+<div class="max-w-md mx-auto card p-8">
+    <h1 class="text-xl font-semibold mb-4">
         Edit: {{ book.title }}
     </h1>
 
@@ -50,10 +50,10 @@
 		  {% endfor %}
 		</div>
         <div class="flex gap-3">
-            {{ form.submit(class_="px-4 py-2 bg-green-600 text-white rounded-lg cursor-pointer") }}
+            {{ form.submit(class_="px-4 py-2 bg-green-600 text-white rounded-lg cursor-pointer hover:bg-green-700 transition") }}
 
             <a href="{{ url_for('main.inventory') }}"
-               class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg">
+               class="px-4 py-2 rounded-lg btn-cancel no-underline">
                 Cancel
             </a>
         </div>
