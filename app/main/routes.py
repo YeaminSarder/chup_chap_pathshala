@@ -1,10 +1,13 @@
-from flask import render_template, request, flash, redirect, url_for
+from flask import render_template, request, flash, redirect, url_for, current_app
 from flask_login import login_required, current_user
+from werkzeug.utils import secure_filename
+import os
 from app.main import bp
-from app.models import Book, User, Loan
+from app.models import Book, User, Loan, Campaign, Category
 from app import db
 from app.decorators import admin_required
 from app.main import featured_books_routes
+from app.main.inventory_forms import EditForm
 from datetime import datetime
 
 @bp.route('/members')
@@ -20,7 +23,6 @@ def members():
 def admin_offers():
     if request.method == 'POST':
         action = request.form.get('action')
-        # Determine discount percentage
         preset = request.form.get('discount_preset')
         custom = request.form.get('custom_discount')
         
@@ -63,7 +65,6 @@ def admin_offers():
     query = Book.query
     search_query = request.args.get('q')
     if search_query:
-        # prefix match 
         query = query.filter(Book.title.ilike(f'{search_query}%'))
         
     page = request.args.get('page', 1, type=int)
@@ -78,8 +79,7 @@ def admin_loans():
     loans = Loan.query.order_by(Loan.checkout_date.desc()).all()
     for loan in loans:
         if loan.status == 'active':
-            delta = loan.due_date - datetime.utcnow()
-            # custom attribute to the object instance 
+            delta = loan.due_date - datetime.utcnow() 
             loan.days_remaining = delta.days
     return render_template('admin_loans.html', loans=loans)
 
@@ -95,7 +95,6 @@ def mark_returned(loan_id):
     loan.status = 'returned'
     loan.return_date = datetime.utcnow()
     
-    # Update Stock
     book = loan.book
     if book:
         book.stock_borrowed = max(0, book.stock_borrowed - 1)
@@ -111,7 +110,6 @@ def mark_returned(loan_id):
 def delete_user(user_id):
     user = User.query.get_or_404(user_id)
     
-    # Prevent deleting self
     if user.id == current_user.id:
         flash('You cannot delete your own account.', 'error')
         return redirect(url_for('main.members'))
@@ -127,10 +125,124 @@ def delete_user(user_id):
         
     return redirect(url_for('main.members'))
 
+# --- Campaign Management Routes ---
+@bp.route('/admin/campaigns')
+@login_required
+@admin_required
+def admin_campaigns():
+    campaigns = Campaign.query.order_by(Campaign.created_at.desc()).all()
+    return render_template('admin_campaigns.html', campaigns=campaigns)
+
+@bp.route('/admin/campaigns/add', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def add_campaign():
+    if request.method == 'POST':
+        title = request.form.get('title')
+        description = request.form.get('description')
+        image_url = request.form.get('image_url')
+        button_text = request.form.get('button_text')
+        button_link = request.form.get('button_link')
+        
+        # Handle File Upload
+        if 'image_file' in request.files:
+            file = request.files['image_file']
+            if file and file.filename != '':
+                filename = secure_filename(file.filename)
+                upload_folder = os.path.join(current_app.root_path, 'static', 'images', 'campaigns')
+                os.makedirs(upload_folder, exist_ok=True)
+                file.save(os.path.join(upload_folder, filename))
+                image_url = url_for('static', filename=f'images/campaigns/{filename}')
+
+        # Parse Dates
+        start_time_str = request.form.get('start_time')
+        end_time_str = request.form.get('end_time')
+        
+        start_time = datetime.strptime(start_time_str, '%Y-%m-%dT%H:%M') if start_time_str else None
+        end_time = datetime.strptime(end_time_str, '%Y-%m-%dT%H:%M') if end_time_str else None
+
+        campaign = Campaign(
+            title=title,
+            description=description,
+            image_url=image_url if image_url else None,
+            button_text=button_text,
+            button_link=button_link,
+            is_active=True,
+            start_time=start_time,
+            end_time=end_time
+        )
+        db.session.add(campaign)
+        db.session.commit()
+        flash('Campaign added successfully.', 'success')
+        return redirect(url_for('main.admin_campaigns'))
+    return render_template('add_edit_campaign.html')
+
+@bp.route('/admin/campaigns/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def edit_campaign(id):
+    campaign = Campaign.query.get_or_404(id)
+    if request.method == 'POST':
+        campaign.title = request.form.get('title')
+        campaign.description = request.form.get('description')
+        new_url = request.form.get('image_url')
+        if new_url:
+            campaign.image_url = new_url
+        campaign.button_text = request.form.get('button_text')
+        campaign.button_link = request.form.get('button_link')
+        campaign.is_active = 'is_active' in request.form
+        
+        # Date Updates
+        start_time_str = request.form.get('start_time')
+        end_time_str = request.form.get('end_time')
+        campaign.start_time = datetime.strptime(start_time_str, '%Y-%m-%dT%H:%M') if start_time_str else None
+        campaign.end_time = datetime.strptime(end_time_str, '%Y-%m-%dT%H:%M') if end_time_str else None
+        
+        # Handle File Upload (Override URL)
+        if 'image_file' in request.files:
+            file = request.files['image_file']
+            if file and file.filename != '':
+                filename = secure_filename(file.filename)
+                upload_folder = os.path.join(current_app.root_path, 'static', 'images', 'campaigns')
+                os.makedirs(upload_folder, exist_ok=True)
+                file.save(os.path.join(upload_folder, filename))
+                campaign.image_url = url_for('static', filename=f'images/campaigns/{filename}')
+        
+        db.session.commit()
+        flash('Campaign updated successfully.', 'success')
+        return redirect(url_for('main.admin_campaigns'))
+        
+    return render_template('add_edit_campaign.html', campaign=campaign)
+
+@bp.route('/admin/campaigns/delete/<int:id>', methods=['POST'])
+@login_required
+@admin_required
+def delete_campaign(id):
+    campaign = Campaign.query.get_or_404(id)
+    try:
+        db.session.delete(campaign)
+        db.session.commit()
+        flash('Campaign deleted.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash('Error deleting campaign.', 'error')
+    return redirect(url_for('main.admin_campaigns'))
+
 @bp.route('/')
 def index():
     books = featured_books_routes.fetch_most_sold(6)
-    return render_template('index.html', books=books)
+    try:
+        now = datetime.utcnow()
+        from sqlalchemy import or_
+        campaigns = Campaign.query.filter(
+            Campaign.is_active == True,
+            or_(Campaign.start_time == None, Campaign.start_time <= now),
+            or_(Campaign.end_time == None, Campaign.end_time >= now)
+        ).all()
+    except:
+        campaigns = []
+        
+    return render_template('index.html', books=books, campaigns=campaigns)
 
 @bp.route('/catalog')
 def catalog():
@@ -138,7 +250,8 @@ def catalog():
     author = request.args.get('author')
     sort = request.args.get('sort')
     
-    categories = ['Bengali', 'Islamic', 'Children', 'Academic']
+    # Fetch all categories from DB
+    categories = [c.name for c in Category.query.order_by(Category.name).all()]
     # Fetch distinct authors
     authors = [a[0] for a in db.session.query(Book.author).distinct().all() if a[0]]
     

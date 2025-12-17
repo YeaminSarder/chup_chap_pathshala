@@ -4,17 +4,67 @@
 
 {% block content %}
 <!-- Hero Section -->
-<div class="hero">
-    <h1>Welcome to ChupChap Pathshala</h1>
-    <p>Your portal to knowledge</p>
-    <p>Discover, Borrow and Own your favorite books.</p>
+<div class="hero-swiper swiper campaignSwiper" style="border-radius: 1rem; overflow: hidden; margin-bottom: 2rem;">
+    <div class="swiper-wrapper">
+        <!-- Default Welcome Slide -->
+        <div class="swiper-slide hero" style="
+            border-radius: 1rem;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            min-height: 400px;
+        ">
+            <h1>Welcome to ChupChap Pathshala</h1>
+            <p>Your portal to knowledge</p>
+            <p>Discover, Borrow and Own your favorite books.</p>
 
-    {% if not current_user.is_authenticated %}
-    <div style="margin-top: 1.5rem;">
-        <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Join Now</a>
-        <a href="{{ url_for('auth.login') }}" class="btn btn-secondary">Login</a>
+            {% if not current_user.is_authenticated %}
+            <div style="margin-top: 1.5rem;">
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Join Now</a>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-secondary">Login</a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Campaign Slides -->
+        {% for campaign in campaigns %}
+        <div class="swiper-slide hero" style="
+            border-radius: 1rem;
+            overflow: hidden;
+            background-image: {% if campaign.image_url %}url('{{ campaign.image_url }}'){% else %}linear-gradient(135deg, #667eea 0%, #764ba2 100%){% endif %};
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+            padding: 2rem;
+        ">
+            <!-- Overlay for better text readability if image exists -->
+            {% if campaign.image_url %}
+            <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.5); z-index: 1;"></div>
+            {% endif %}
+
+            <div style="position: relative; z-index: 2;">
+                <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">{{ campaign.title }}</h1>
+                {% if campaign.description %}
+                <p style="font-size: 1.25rem; margin-bottom: 1.5rem; max-width: 600px; margin-left: auto; margin-right: auto; text-shadow: 0 1px 2px rgba(0,0,0,0.3);">{{ campaign.description }}</p>
+                {% endif %}
+                
+                <a href="{{ campaign.button_link }}" class="btn btn-primary" style="font-size: 1.1rem; padding: 0.75rem 2rem;">{{ campaign.button_text }}</a>
+            </div>
+        </div>
+        {% endfor %}
     </div>
-    {% endif %}
+    <div class="swiper-pagination"></div>
 </div>
 
 <!-- Categories Section -->
@@ -56,7 +106,6 @@
 {% include "featured.html" %}
 
 <!-- Promotional / Premium Perks Section -->
-<!-- Promotional / Premium Perks Section -->
 <div class="premium-perks">
     <div>
         <h2 style="font-size: 2rem; font-weight: 800; margin-bottom: 1rem;">Unlock Premium Perks</h2>
@@ -80,18 +129,32 @@
         </ul>
     </div>
 
-    <!-- Visual Element (Simple Card Representation or Illustration Placeholder) -->
     <div
         style="background: rgba(255,255,255,0.1); padding: 2rem; border-radius: 1rem; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);">
-        <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem;">Extensive Catalog Access</h3>
-        <p style="opacity: 0.9; margin-bottom: 1.5rem;">Browse thousands of titles from our extensive collection. From
-            rare Bengali classics to modern international bestsellers.</p>
+
         <a href="{{ url_for('main.catalog') }}"
             style="width: 100%; display: block; text-align: center; padding: 0.75rem; background: rgba(255,255,255,0.2); color: white; text-decoration: none; border-radius: 0.5rem; font-weight: 600; transition: background 0.2s;">Explore
             Full Catalog</a>
     </div>
 </div>
 <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        if (document.querySelector('.campaignSwiper')) {
+            new Swiper(".campaignSwiper", {
+                slidesPerView: 1,
+                loop: true,
+                autoplay: {
+                    delay: 5000,
+                    disableOnInteraction: false,
+                },
+                pagination: {
+                    el: ".swiper-pagination",
+                    clickable: true,
+                },
+            });
+        }
+    });
+
 function uploadCover(input, bookId) {
     if (input.files && input.files[0]) {
         const file = input.files[0];
@@ -107,7 +170,6 @@ function uploadCover(input, bookId) {
         
         // Show Spinner / Hide overlay
         const spinner = document.getElementById(`spinner-${bookId}`);
-        // Ensure overlay can be hidden if needed, though mostly spinner is enough context
         
         if(spinner) spinner.style.display = 'block';
         
@@ -120,14 +182,12 @@ function uploadCover(input, bookId) {
             if (contentType && contentType.indexOf("application/json") !== -1) {
                 return response.json();
             } else {
-                // If response is not JSON (e.g., 413 HTML from Nginx/Flask, or 500)
                 const text = await response.text();
                 throw new Error(`Server returned non-JSON response: ${response.status} ${response.statusText}. Response: ${text.substring(0, 100)}...`);
             }
         })
         .then(data => {
             if (data.success) {
-                // Update Image Source
                 const img = document.getElementById(`img-${bookId}`);
                 if(img) img.src = data.image_url + '?t=' + new Date().getTime();
             } else {
@@ -140,7 +200,6 @@ function uploadCover(input, bookId) {
         })
         .finally(() => {
             if(spinner) spinner.style.display = 'none';
-            // Clear input so same file can be selected again if needed
             input.value = '';
         });
     }

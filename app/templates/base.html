@@ -90,6 +90,8 @@
                         {% if current_user.is_admin() %}
                         <a href="{{ url_for('main.supplier_review') }}" class="dropdown-item">Order
                         </a>
+                        <a href="{{ url_for('main.admin_campaigns') }}" class="dropdown-item">Campaigns
+                        </a>
                         {% endif %}
 
                         {% if current_user.is_staff() %}

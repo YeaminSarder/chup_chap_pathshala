@@ -100,13 +100,9 @@
             <select name="category"
                 class="w-full p-3 border rounded-lg outline-none"
                 style="background-color: var(--bg-color); color: var(--text-color); border-color: var(--border-color);">
-                <option value="General">General</option>
-                <option value="Bengali">Bengali</option>
-                <option value="Islamic">Islamic</option>
-                <option value="Fiction">Fiction</option>
-                <option value="Non-Fiction">Non-Fiction</option>
-                <option value="Academic">Academic</option>
-                <option value="Children">Children</option>
+                {% for value, label in categories %}
+                    <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
             </select>
         </div>
 
