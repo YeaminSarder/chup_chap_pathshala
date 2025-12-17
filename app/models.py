@@ -29,7 +29,7 @@ class User(UserMixin, db.Model):
     phone_number = db.Column(db.String(20))
     password_hash = db.Column(db.String(256))
     role = db.Column(db.String(20), default='customer')
-    membership_type = db.Column(db.String(20), default='standard') # standard, premium
+    membership_type = db.Column(db.String(20), default='standard') 
     membership_expiry = db.Column(db.DateTime, nullable=True)
     
     # Profile Customization
@@ -77,8 +77,8 @@ class Book(db.Model):
     
     # Inventory Management
     item_type = db.Column(db.String(20), default='hybrid') # circulation, sale, hybrid
-    category = db.Column(db.String(50), default='General') # e.g. Fiction, Islamic, Bengali
-    location = db.Column(db.String(100)) # e.g., "Aisle 3, Shelf B"
+    category = db.Column(db.String(50), default='General') # Fiction, Islamic, Bengali
+    location = db.Column(db.String(100)) # Aisle 3, Shelf B
     image_url = db.Column(db.String(500)) # Poster URL
     discount_percentage = db.Column(db.Float, default=0.0)
 
@@ -159,7 +159,7 @@ class Supplier(db.Model):
 class SupplyOrder(db.Model):
     __tablename__ = 'supply_orders'
     id = db.Column(db.Integer, primary_key=True)
-    supplier_id = db.Column(db.Integer, db.ForeignKey('suppliers.id'), nullable=True) # Nullable for draft/shortlist
+    supplier_id = db.Column(db.Integer, db.ForeignKey('suppliers.id'), nullable=True) 
     status = db.Column(db.String(20), default='shortlist') 
     # Statuses: 'shortlist', 'apply_gravity', 'pending_review', 'placed', 'completed'
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -190,3 +190,27 @@ class EBook(db.Model):
 
     def __repr__(self):
         return f'<EBook {self.title}>'
+
+class Campaign(db.Model):
+    __tablename__ = 'campaigns'
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=True) # Text displayed below title
+    image_url = db.Column(db.String(500), nullable=True) # Background image
+    button_text = db.Column(db.String(50), default='Learn More')
+    button_link = db.Column(db.String(500), default='#')
+    is_active = db.Column(db.Boolean, default=True)
+    start_time = db.Column(db.DateTime, nullable=True)
+    end_time = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<Campaign {self.title}>'
+
+class Category(db.Model):
+    __tablename__ = 'categories'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique=True, nullable=False)
+
+    def __repr__(self):
+        return f'<Category {self.name}>'

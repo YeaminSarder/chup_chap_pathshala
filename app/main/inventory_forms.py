@@ -2,6 +2,8 @@ from flask_wtf import FlaskForm
 from wtforms import IntegerField, SubmitField, StringField, SelectField,FloatField
 from wtforms.validators import DataRequired, InputRequired, NumberRange, Length, URL, Optional
 
+from app.models import Category
+
 class RestockForm(FlaskForm):
     quantity = IntegerField(
         "Quantity to Add",
@@ -10,6 +12,10 @@ class RestockForm(FlaskForm):
     submit = SubmitField("Restock")
 
 class EditForm(FlaskForm):
+    def __init__(self, *args, **kwargs):
+        super(EditForm, self).__init__(*args, **kwargs)
+        self.category.choices = [(c.name, c.name) for c in Category.query.order_by(Category.name).all()]
+
     title = StringField(
         "Title",
         validators=[DataRequired(), Length(min=1, max=140)]        
@@ -27,15 +33,8 @@ class EditForm(FlaskForm):
         ("sale", "Sale"),
         ("hybrid", "Hybrid (Sell/Borrow)")
     ])
-    category = SelectField("Availability (Sell/Borrow)",choices=[    
-                ("General","General"),
-                ("Bengali","Bengali"),
-                ("Islamic","Islamic"),
-                ("Fiction","Fiction"),
-                ("Non-Fiction","Non-Fiction"),
-                ("Academic","Academic"),
-                ("Children","Children"),
-    ])
+    category = SelectField("Category", choices=[]) 
+
     location = StringField(
         "Location",
         validators=[DataRequired(), Length(min=1, max=100)]
