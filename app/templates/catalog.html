@@ -67,13 +67,13 @@
             {% endif %}
         </div>
     </div>
-<div class="features-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+<div class="features-grid">
     {% for book in books %}
-    <div class="card" style="display: flex; flex-direction: column; overflow: hidden;">
+    <div class="card">
         <div class="book-image-container">
             {% if book.image_url %}
             <img src="{{ book.image_url }}" alt="{{ book.title }}"
-                style="height: 100%; width: 100%; object-fit: cover;" id="img-{{ book.id }}">
+                id="img-{{ book.id }}">
             {% else %}
             <div class="no-cover-placeholder" id="img-{{ book.id }}">
                 <span>No Cover</span>
@@ -99,12 +99,12 @@
             {% endif %}
         </div>
         <h3>{{ book.title }}</h3>
-        <p><strong>Author:</strong> {{ book.author }}</p>
-        <p><strong>Availability:</strong> <span
+        <p class="text-sm mb-1"><strong>Author:</strong> {{ book.author }}</p>
+        <p class="text-sm mb-1"><strong>Availability:</strong> <span
                 class="status-badge">{{
                 book.item_type|capitalize }}</span></p>
-        <p><strong>Category:</strong> <span style="color: #6B7280;">{{ book.category }}</span></p>
-        <p>
+        <p class="text-sm mb-1"><strong>Category:</strong> <span style="color: #6B7280;">{{ book.category }}</span></p>
+        <p class="text-sm mb-1">
             <strong>Price:</strong>
             {% if book.discount_percentage and book.discount_percentage > 0 %}
                 <span class="text-red-500 line-through mr-1">TK {{ "%.2f"|format(book.price) }}</span>
@@ -113,10 +113,10 @@
                 TK {{ "%.2f"|format(book.price) }}
             {% endif %}
         </p>
-        <p><strong>Creating Stock:</strong> {{ book.stock_available }}</p>
+        <p class="text-sm"><strong>Stock:</strong> {{ book.stock_available }}</p>
 
         <!-- Action Buttons Grid -->
-        <div style="margin-top: 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+        <div style="margin-top: auto; padding-top: 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
             
             {% set show_buy = (book.item_type in ['sale', 'hybrid'] and book.stock_available > 0) %}
             {% set show_borrow = (book.item_type in ['circulation', 'hybrid'] and book.stock_available > 0) %}

@@ -34,6 +34,11 @@
             </a>
         </div>
 
+        <!-- Mobile Menu Button -->
+        <button id="mobile-menu-btn" class="mobile-menu-btn">
+            <i class="fas fa-bars"></i>
+        </button>
+
         <!-- Search Bar -->
         <div class="search-section relative">
             <form action="{{ url_for('main.search') }}" method="GET" class="search-form w-full relative">
@@ -54,7 +59,7 @@
         </div>
 
         <!-- Navigation Links (Pill shaped) -->
-        <div class="nav-links">
+        <div class="nav-links" id="nav-links">
             <a href="{{ url_for('main.index') }}" class="nav-pill">Home</a>
             <a href="{{ url_for('main.catalog') }}" class="nav-pill">All Books</a>
             <a href="{{ url_for('main.catalog', filter='offers') }}" class="nav-pill">🎁Offer</a>
@@ -126,7 +131,7 @@
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                         <circle cx="12" cy="7" r="4"></circle>
                     </svg>
-                    <span>{{ current_user.username }}</span>
+                    <span class="hidden sm:inline">{{ current_user.username }}</span>
                 </a>
                 <div class="absolute left-1/2 transform -translate-x-1/2 top-full mt-2 w-48 hidden group-hover:block dropdown-menu z-50">
                     <div>
@@ -158,6 +163,11 @@
             </a>
         </div>
     </nav>
+    <script>
+        document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+            document.querySelector('.navbar').classList.toggle('mobile-menu-open');
+        });
+    </script>
 
     <div class="container">
         <div class="flash-messages">
@@ -337,7 +347,6 @@
             // Add active class to current
             if (currentFocus > -1 && items[currentFocus]) {
                 items[currentFocus].classList.add('active');
-                // Optional: Scroll into view if we had a scrollbar
             }
         }
 
@@ -368,8 +377,6 @@
                 e.preventDefault();
                 const form = e.target;
                 const button = form.querySelector('button[type="submit"]:hover') || form.querySelector('button[type="submit"]');
-                // Note: :hover is a heuristic, better to rely on submitter if supported or just grab the first one if only one exists usually.
-                // Better approach with e.submitter if available (modern browsers)
                 const submitter = e.submitter;
 
                 const originalText = submitter ? submitter.innerHTML : (button ? button.innerHTML : 'Submit');
@@ -394,7 +401,6 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            // Update badge
                             const existingBadge = document.querySelector('.cart-badge');
                             if (existingBadge) {
                                 existingBadge.textContent = data.cart_count;
@@ -408,7 +414,7 @@
                                 }
                             }
 
-                            // Temporary Button Feedback
+                    
 
                         } else {
                             // Fallback
