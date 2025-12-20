@@ -181,7 +181,7 @@ def add_ext_book():
         flash(f"Successfully Added '{book.title}'.", "success")
         return redirect(url_for("main.inventory"))
 
-    return render_template("add_ext_book.html", form=form)
+    return render_template("edit_book.html", form=form, action='add_ext_book')
 
 
 @bp.route('/inventory/delete/<int:book_id>', methods=['POST'])

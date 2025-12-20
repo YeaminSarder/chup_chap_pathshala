@@ -1,6 +1,6 @@
 from flask import Flask
 from config import Config
-from app.extensions import db, migrate, login_manager, oauth, mail
+from app.extensions import db, migrate, login_manager, oauth, mail, back
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -22,6 +22,13 @@ def create_app(config_class=Config):
         client_kwargs={
             'scope': 'openid email profile'
         }
+    )
+
+    back.init_app(
+        app,
+        default_url="/",       # Where to go if nothing is saved
+        use_referrer=True,             # Use Referer header as fallback
+        excluded_endpoints=["static"]  # List of endpoints to skip
     )
 
     # Import models to register them with SQLAlchemy
