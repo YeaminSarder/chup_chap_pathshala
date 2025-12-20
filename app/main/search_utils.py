@@ -65,11 +65,13 @@ def full_text_search(query):
 
 @dataclass
 class ExtBook:
+    key: str
     title: str
     author: str
     cover: str
     lang: [str]
 URL = "https://openlibrary.org/search.json"
+OPENLIBRARY_HEADER = {"User-Agent": "ChupChapPathShala/1.0 (md.yeamin.sarder@g.bracu.ac.bd)"}
 def ext_search(query):
     "searches book externally. returns books, error"
     response = requests.get(URL,
@@ -78,7 +80,7 @@ def ext_search(query):
                                 #"limit": 60,
                                 "lang": "bn"
                             },
-                            headers={"User-Agent": "ChupChapPathShala/1.0 (md.yeamin.sarder@g.bracu.ac.bd)"}
+                            headers=OPENLIBRARY_HEADER
                             )
     json = response.json()
     if 'error' in json:
@@ -86,11 +88,12 @@ def ext_search(query):
     books = []
     for book in json["docs"]:
         try:
+            key = book["cover_edition_key"]
             title = book["title"]
             author = ", ".join(book["author_name"])
             cover = f"https://covers.openlibrary.org/b/olid/{book['cover_edition_key']}-M.jpg"
             lang = book["language"] if "language" in book else []
-            books.append(ExtBook(title, author, cover, lang))
+            books.append(ExtBook(key, title, author, cover, lang))
         except KeyError as ke:
             pass#print(book)
     books.sort(key=lambda book: "ben" in book.lang, reverse=True)
