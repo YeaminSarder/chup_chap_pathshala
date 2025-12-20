@@ -1,12 +1,17 @@
 {% extends "base.html" %}
 
-{% block title %}Restock {{ book.title }}{% endblock %}
+{% block title %} Edit {{ form.title.data }}{% endblock %}
 
 {% block content %}
 
 <div class="max-w-md mx-auto card p-8">
-    <h1 class="text-xl font-semibold mb-4">
-        Edit: {{ book.title }}
+  <h1 class="text-xl font-semibold mb-4">
+	{% if action=='add_ext_book' %}
+	  Add: 
+	{% else %}
+      Edit:
+	{% endif %}
+	  {{ form.title.data }}
     </h1>
 
     <form method="POST">
@@ -52,7 +57,7 @@
         <div class="flex gap-3">
             {{ form.submit(class_="px-4 py-2 bg-green-600 text-white rounded-lg cursor-pointer hover:bg-green-700 transition") }}
 
-            <a href="{{ url_for('main.inventory') }}"
+            <a href="{{ back_url }}"
                class="px-4 py-2 rounded-lg btn-cancel no-underline">
                 Cancel
             </a>

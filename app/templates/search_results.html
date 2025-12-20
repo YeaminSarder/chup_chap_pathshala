@@ -44,6 +44,14 @@
               <p class="text-sm text-gray-600 mb-3 truncate">
                 by {{ book.author }}
               </p>
+              <div class="flex items-center justify-between">
+				<form action={{ url_for('main.add_ext_book_pre')}} method="POST">
+				  <input type=hidden name='title' value="{{ book.title }}"/>
+  				  <input type=hidden name='author' value="{{ book.author }}"/>
+				  <input type=hidden name='cover' value="{{ book.cover }}"/>
+				  <button type="submit" class="p-2 rounded bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors" > Add Book </button>
+				</form>
+			  </div>
 			</div>
 		  </div>
 		{% endfor %}

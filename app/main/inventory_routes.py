@@ -1,11 +1,12 @@
 from flask import render_template, redirect, url_for, flash, request
 from flask_login import login_required
 from app import db
-from app.main import bp
+from app.main import bp, search_utils
 from app.models import Book
 from app.decorators import staff_required
-
+import requests
 from app.main.inventory_forms import RestockForm, EditForm
+from flask import session
 
 class PaginateProxy:
     def __init__(self,items):
@@ -121,7 +122,66 @@ def edit_book(book_id):
         flash(f"Successfully Edited '{book.title}'.", "success")
         return redirect(url_for("main.inventory"))
 
-    return render_template("edit_book.html", form=form, book=book)
+    return render_template("edit_book.html", form=form)
+
+
+
+
+
+@bp.route("/inventory/add_ext_book_pre", methods=["POST"])
+@login_required
+@staff_required
+def add_ext_book_pre():
+    session['add_ext_book_data'] = {
+        'title': request.form.get('title'),
+        'author': request.form.get('author'),
+        'cover': request.form.get('cover')
+    }
+    return redirect(url_for('main.add_ext_book'))
+
+
+@bp.route("/inventory/add_ext_book", methods=["GET", "POST"])
+@login_required
+@staff_required
+def add_ext_book():
+    form = EditForm()
+    book = Book()
+    if request.method == "GET":
+        data = session.pop('add_ext_book_data',{})
+        book.title = data.get('title', "")
+        book.author = data.get('author', "")
+        book.image_url = data.get('cover',"")
+        
+        form.title.data = book.title
+        form.author.data = book.author
+        form.price.data = book.price
+        form.item_type.data = book.item_type
+        form.category.data = book.category
+        form.location.data = book.location
+        form.image_url.data = book.image_url
+        form.stock_available.data = book.stock_available
+        form.stock_borrowed.data = book.stock_borrowed
+        form.stock_sold.data = book.stock_sold
+
+    
+    if form.validate_on_submit():
+        book.title = form.title.data
+        book.author = form.author.data
+        book.price = form.price.data
+        book.item_type = form.item_type.data
+        book.category = form.category.data
+        book.location = form.location.data
+        book.image_url = form.image_url.data
+        book.stock_available = form.stock_available.data
+        book.stock_borrowed = form.stock_borrowed.data
+        book.stock_sold = form.stock_sold.data
+        book.stock_total = book.stock_borrowed + book.stock_sold + book.stock_available
+        db.session.add(book)        
+        db.session.commit()
+        flash(f"Successfully Added '{book.title}'.", "success")
+        return redirect(url_for("main.inventory"))
+
+    return render_template("edit_book.html", form=form, action='add_ext_book')
 
 
 @bp.route('/inventory/delete/<int:book_id>', methods=['POST'])
