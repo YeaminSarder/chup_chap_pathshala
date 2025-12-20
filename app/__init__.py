@@ -44,6 +44,9 @@ def create_app(config_class=Config):
     from app.forum import bp as forum_bp
     app.register_blueprint(forum_bp, url_prefix='/forum')
 
+    from app.user import bp as user_bp
+    app.register_blueprint(user_bp, url_prefix='/user')
+
     return app
 
 # Force reload for search ranking fix
